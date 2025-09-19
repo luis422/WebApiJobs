@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Quartz;
 using System.Net.Mail;
 using WebApiJobs.Data;

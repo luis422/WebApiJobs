@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.UI.Services;
-using System.IO;
 using System.Net;
 using System.Net.Mail;
-using System.Net.Mime;
 using System.Text;
-using WebApiJobs.DevPack;
 
 namespace WebApiJobs.Services
 {

@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity.UI.Services;
+using System.IO;
 using System.Net;
 using System.Net.Mail;
+using System.Net.Mime;
+using System.Text;
+using WebApiJobs.DevPack;
 
 namespace WebApiJobs.Services
 {
@@ -69,7 +73,24 @@ namespace WebApiJobs.Services
 
     }
 
-    public class EmailSenderService : IEmailSender
+    public interface IEmailSenderService : IEmailSender
+    {
+        public async Task SendEmailAsync(List<string> emailsReceivers, string subject, string contentBody)
+            => await SendEmailAsync(emailsReceivers, subject, contentBody, default, default);
+
+        public async Task SendEmailAsync(List<string> emailsReceivers, string subject, string contentBody, List<string>? emailsCC)
+            => await SendEmailAsync(emailsReceivers, subject, contentBody, emailsCC, default);
+
+        public async Task SendEmailAsync(List<string> emailsReceivers, string subject, string contentBody, List<Attachment>? attachments)
+            => await SendEmailAsync(emailsReceivers, subject, contentBody, default, attachments);
+
+        public async Task SendEmailAsync(string emailReceiver, string subject, string contentBody, List<Attachment>? attachments)
+            => await SendEmailAsync([emailReceiver], subject, contentBody, default, attachments);
+
+        Task SendEmailAsync(List<string> emailsReceivers, string subject, string contentBody, List<string>? emailsCC, List<Attachment>? attachments);
+    }
+
+    public class EmailSenderService : IEmailSenderService
     {
         private readonly EmailHost _host;
         private readonly NetworkCredential _credentials;
@@ -84,23 +105,69 @@ namespace WebApiJobs.Services
             _credentials = credentials;
         }
 
-        public Task SendEmailAsync(string emailReceiver, string subject, string content)
-            => SendEmailAsync([emailReceiver], subject, content);
+        public async Task SendEmailAsync(string emailReceiver, string subject, string contentBody)
+            => await SendEmailAsync([emailReceiver], subject, contentBody, default, default);
 
-        public Task SendEmailAsync(List<string> emailReceivers, string subject, string content)
+        public async Task SendEmailAsync(List<string> emailsReceivers, string subject, string contentBody, List<string>? emailsCC, List<Attachment>? attachments)
         {
-            var client = new SmtpClient(_host.Host, _host.Port)
+            using var mm = new MailMessage(
+                from: _credentials.UserName,
+                to: string.Join(',', emailsReceivers),
+                subject: subject,
+                body: contentBody
+            )
             {
-                EnableSsl = _host.Ssl,
-                Credentials = _credentials,
+                IsBodyHtml = true,
             };
 
-            return client.SendMailAsync(new MailMessage(
-                from: _credentials.UserName,
-                to: string.Join(',', emailReceivers),
-                subject: subject,
-                body: content
-                ));
+            mm.SubjectEncoding = Encoding.UTF8;
+            mm.BodyEncoding = Encoding.UTF8;
+
+            if (emailsCC != default)
+            {
+                foreach (var emailReceiver in emailsCC)
+                {
+                    mm.CC.Add(emailReceiver);
+                }
+            }
+            try
+            {
+                if (attachments != null)
+                {
+                    foreach (var attachment in attachments)
+                    {
+                        mm.Attachments.Add(attachment);
+                    }
+                    //foreach (var attachment in attachments)
+                    //{
+                    //    var bytes = attachment.Value;
+                    //    if (bytes == null || bytes.Length == 0)
+                    //    {
+                    //        continue;
+                    //    }
+
+                    //    var fileName = attachment.Key;
+                    //    var ms = new MemoryStream(bytes);
+                    //    mm.Attachments.Add(new Attachment(ms, fileName, MimeTypeHelper.GetMimeType(fileName)));
+                    //}
+                }
+
+                using var client = new SmtpClient(_host.Host, _host.Port)
+                {
+                    EnableSsl = _host.Ssl,
+                    Credentials = _credentials,
+                };
+
+                await client.SendMailAsync(mm);
+            }
+            finally
+            {
+                foreach (var a in mm.Attachments)
+                {
+                    a.Dispose();
+                }
+                mm.Attachments.Dispose();
+            }
         }
     }
 }

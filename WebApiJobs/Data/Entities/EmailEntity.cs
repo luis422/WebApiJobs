@@ -21,16 +21,18 @@ namespace WebApiJobs.Data.Entities
         public string Subject { get; set; }
         public string Content { get; set; }
         public EEmailStatus Status { get; set; }
-        public DateTime? SentAt { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset? SentAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
+
+        public ICollection<EmailAttachmentEntity>? Attachments { get; set; }
 
         public EmailEntity()
         {
-            Receiver = "";
-            Subject = "";
-            Content = "";
+            Receiver = string.Empty;
+            Subject = string.Empty;
+            Content = string.Empty;
             Status = EEmailStatus.Pending;
-            CreatedAt = DateTime.UtcNow;
+            CreatedAt = DateTimeOffset.Now;
         }
     }
 }

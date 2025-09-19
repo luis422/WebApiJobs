@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApiJobs.Data;
 
@@ -11,9 +12,11 @@ using WebApiJobs.Data;
 namespace WebApiJobs.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250915222438_Alteração do tipo da colunas datetime para datetimeoffset da tabela de emails")]
+    partial class Alteraçãodotipodacolunasdatetimeparadatetimeoffsetdatabeladeemails
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,36 +24,6 @@ namespace WebApiJobs.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("WebApiJobs.Data.Entities.EmailAttachmentEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<byte[]>("FileBytes")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("FileContentType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("FkEmail")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FkEmail");
-
-                    b.ToTable("EmailAttachments");
-                });
 
             modelBuilder.Entity("WebApiJobs.Data.Entities.EmailEntity", b =>
                 {
@@ -86,22 +59,6 @@ namespace WebApiJobs.Migrations
                     b.HasIndex(new[] { "Status" }, "i_emails_status");
 
                     b.ToTable("Emails");
-                });
-
-            modelBuilder.Entity("WebApiJobs.Data.Entities.EmailAttachmentEntity", b =>
-                {
-                    b.HasOne("WebApiJobs.Data.Entities.EmailEntity", "Email")
-                        .WithMany("Attachments")
-                        .HasForeignKey("FkEmail")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Email");
-                });
-
-            modelBuilder.Entity("WebApiJobs.Data.Entities.EmailEntity", b =>
-                {
-                    b.Navigation("Attachments");
                 });
 #pragma warning restore 612, 618
         }

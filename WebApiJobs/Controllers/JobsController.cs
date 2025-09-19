@@ -25,8 +25,8 @@ namespace WebApiJobs.Controllers
             var infos = r.Select(jobKey => jobs.GetJobDetail(jobKey, ct).Result)
                 .Where(x => x != null)
                 .ToDictionary(
-                    x => x.Key.Name,
-                    x => x.JobDataMap.ToDictionary()
+                    x => x!.Key.Name,
+                    x => x!.JobDataMap.ToDictionary()
                 );
 
             return Ok(infos);

@@ -15,7 +15,7 @@ namespace WebApiJobs.Infrastructure
 
         private static void ConfigureEmailSender(IServiceCollection services)
         {
-            services.AddSingleton<IEmailSender>((s) =>
+            services.AddSingleton<IEmailSenderService>((s) =>
             {
                 var configuration = s.GetRequiredService<IConfiguration>();
                 var hostType = Enum.Parse<EEmailHostType>(configuration["SMTP:TypeHost"] ?? nameof(EEmailHostType.Custom));
@@ -38,6 +38,8 @@ namespace WebApiJobs.Infrastructure
                 );
                 return new EmailSenderService(emailHost, credentials);
             });
+
+            services.AddSingleton<IEmailSender>((s) => s.GetService<IEmailSenderService>()!);
         }
 
         private static void ConfigureJobs(IServiceCollection services)
@@ -51,7 +53,7 @@ namespace WebApiJobs.Infrastructure
             {
                 options.WaitForJobsToComplete = true;
                 options.AwaitApplicationStarted = true;
-                options.StartDelay = TimeSpan.FromSeconds(10);
+                options.StartDelay = TimeSpan.FromSeconds(5);
             });
 
             // Adicionando o IScheduler do AddQuartz para injeção nos Controllers.

@@ -15,9 +15,9 @@ namespace WebApiJobs.Jobs
         {
             try
             {
-                context.JobDetail.JobDataMap.Put("LastRun", DateTime.UtcNow);
+                context.JobDetail.JobDataMap.Put("LastRun", DateTimeOffset.Now);
 
-                _logger.LogInformation("{UtcNow}", DateTime.UtcNow);
+                _logger.LogInformation("{UtcNow}", DateTimeOffset.Now);
                 return Task.CompletedTask;
             }
             catch (Exception ex)

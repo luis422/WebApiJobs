@@ -8,7 +8,7 @@ namespace WebApiJobs.Infrastructure.JobSetups
     {
         public void Configure(QuartzOptions options)
         {
-            var interval = TimeSpan.FromSeconds(60);
+            var interval = TimeSpan.FromSeconds(40);
             //if (interval.TotalMinutes < 1)
             //{
             //    interval = TimeSpan.FromMinutes(1);
